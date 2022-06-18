@@ -70,12 +70,7 @@
     "coverageDirectory": "../coverage",
     "testEnvironment": "node"
   },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged"
-    }
-  },
   "lint-staged": {
-    "*.{js,jsx,ts,tsx}": "yarn run lint:fix"
+    "*.{ts,js}": "npm run lint"
   }
 }
