@@ -22,10 +22,11 @@ export class AuthService {
         data: {
           email: dto.email,
           password: hash,
+          isAdmin: dto.isAdmin,
         },
       });
       delete user.password;
-      return this.signToken(user.id, user.email);
+      return this.signToken(user.id, user.email, user.isAdmin);
     } catch (error) {
       if (error instanceof PrismaClientKnownRequestError) {
         if (error.code === 'P2002') {
@@ -46,16 +47,18 @@ export class AuthService {
     const pwdMatches = await argon.verify(user.password, dto.password);
     if (!pwdMatches) throw new ForbiddenException('Credentials incorrect');
     delete user.password;
-    return this.signToken(user.id, user.email);
+    return this.signToken(user.id, user.email, user.isAdmin);
   }
 
   async signToken(
     userId: number,
     email: string,
+    isAdmin: boolean,
   ): Promise<{ access_token: string }> {
     const payload = {
       sub: userId,
       email,
+      isAdmin,
     };
     const access_token = await this.jwtService.signAsync(payload, {
       expiresIn: '15m',

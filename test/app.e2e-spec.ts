@@ -53,6 +53,7 @@ describe('App e2e', () => {
       it('should signup', () => {
         return pactum
           .spec()
+          .inspect()
           .post('/auth/signup')
           .withBody(dto)
           .expectStatus(201);
@@ -216,6 +217,45 @@ describe('App e2e', () => {
             .expectJsonLength(0);
         });
       });
+    });
+  });
+
+  describe('Admin', () => {
+    const adminDto: AuthDto = {
+      email: 'admin@example.com',
+      password: 'password',
+      isAdmin: true,
+    };
+    it('should not be able to access all the users with normal login', () => {
+      return pactum
+        .spec()
+        .inspect()
+        .get('/admin/users')
+        .withHeaders({ authorization: 'Bearer $S{userAt}' })
+        .expectStatus(403);
+    });
+    it('should signup as admin user (ONLY FOR TESTING)', () => {
+      return pactum
+        .spec()
+        .post('/auth/signup')
+        .withBody(adminDto)
+        .expectStatus(201);
+    });
+    it('should signin as admin user', () => {
+      return pactum
+        .spec()
+        .post('/auth/signin')
+        .withBody(adminDto)
+        .stores('admin_token', 'access_token')
+        .expectStatus(200);
+    });
+    it('should able to access all the users with admin login', () => {
+      return pactum
+        .spec()
+        .inspect()
+        .get('/admin/users')
+        .withHeaders({ authorization: 'Bearer  $S{admin_token}' })
+        .expectStatus(200);
     });
   });
 });
